@@ -31,5 +31,5 @@ export const tickersReducer = (state = initialState, action) => {
             return state
     }
 }
-
-const addTicker = (name) => ({type: ADD_TICKER, name})
+debugger
+export const addTicker = (card) => ({type: ADD_TICKER, card})

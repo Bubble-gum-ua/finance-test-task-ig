@@ -1,11 +1,12 @@
 import './App.css';
 import {io} from "socket.io-client";
 import {TickerCard} from "./Components/TickerCard";
-import {useEffect} from "react";
-import {useSelector} from "react-redux";
-import store from "./Redux/redux-state";
+import {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+ import store from "./Redux/redux-state";
 import {useFormik} from "formik";
 import {Button, Input, makeStyles} from "@material-ui/core";
+import {addTicker} from "./Redux/TikersReducer";
 
 const useStyles = makeStyles((theme) => ({
     button: {
@@ -20,16 +21,20 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
     const socket = io('ws://localhost:4000')
+    const dispatch = useDispatch()
     socket.emit('start');
     let tick = useSelector(store => store.tickers.tickers)
-    console.log("tick", tick)
-
+    const [tickerApi, setTicker] = useState()
     let tickerCard = tick.map(t => <TickerCard props={t}/>)
     useEffect(() => {
-        let tickers;
         socket.on('ticker', (response) => {
             const res = Array.isArray(response) ? response : [response];
+            console.log("res",res)
+            setTicker(res)
         })
+        return () => {
+            setTicker({}); // This worked for me
+        };
     }, [])
 
     const formik = useFormik({
@@ -37,7 +42,14 @@ function App() {
             name: '',
         },
         onSubmit: (values) => {
-            console.log("asd", values)
+            for (let i=0; i< tickerApi.length; i++){
+                if(values.name === tickerApi[i].ticker){
+                    console.log("asdSD",tickerApi[i])
+                    dispatch(addTicker(tickerApi[i]))
+                }
+            }
+
+
         }
     })
     return (
