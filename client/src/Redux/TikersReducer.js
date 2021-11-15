@@ -1,21 +1,12 @@
 import React from "react";
+import {io} from "socket.io-client";
 
 const ADD_TICKER = 'ADD_TICKER';
-const DELETE_TICKER = 'DELETE_TICKER';
+const REFRESH_DATA = 'REFRESH_DATA'
+const SET_ERROR = 'SET_ERROR';
 
 let initialState = {
-    tickers: [
-        {
-            change: '0',
-            change_percent: '0',
-            dividend: '0',
-            exchange: '0',
-            last_trade_time: '0',
-            price: '0',
-            ticker: '0',
-            yield: '0'
-        }
-    ],
+    tickers: [],
 }
 
 
@@ -24,12 +15,49 @@ export const tickersReducer = (state = initialState, action) => {
         case ADD_TICKER : {
             return {
                 ...state,
-                tickers: [action.body, ...state.tickers]
+                tickers: [action.card, ...state.tickers]
+            }
+        }
+        case REFRESH_DATA : {
+            const currenTicker = state.tickers.findIndex(el => el.id === action.card.id)
+            state.tickers[currenTicker] = action.card
+            return {
+                ...state,
+                tickers: [...state.tickers]
             }
         }
         default:
             return state
     }
 }
-debugger
 export const addTicker = (card) => ({type: ADD_TICKER, card})
+export const refreshTicker = (card) => ({type: REFRESH_DATA, card})
+export const setError = (error) => ({type: SET_ERROR, error})
+export const subscribeToTicker = (name, action) => {
+    return (dispatch, getState) => {
+        if (action === 'ADD_TICKER') {
+            debugger
+            const socket = io('ws://localhost:4000')
+            socket.emit('start');
+            socket.on('ticker', (response) => {
+                const res = Array.isArray(response) ? response : [response];
+                for (let i = 0; i < res.length; i++) {
+                    if (name === res[i].ticker) {
+                        console.log(getState().tickers.tickers.map(e => e.ticker === name))
+                        let arrF = getState().tickers.tickers.filter(obj => {
+                            return obj.ticker === name
+                        })
+
+                        console.log("arrF",arrF)
+                        if (arrF[0] !== undefined && arrF[0].ticker === name) {
+                            dispatch(refreshTicker(res[i]))
+                        } else {
+                            dispatch(addTicker(res[i]))
+                        }
+                    }
+                }
+
+            })
+        }
+    }
+}
