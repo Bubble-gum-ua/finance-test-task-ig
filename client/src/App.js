@@ -2,7 +2,7 @@ import './App.css';
 import {TickerCard} from "./Components/TickerCard";
 import {useDispatch, useSelector} from "react-redux";
 import {useFormik} from "formik";
-import {Button, Grid, Input, makeStyles, Paper} from "@material-ui/core";
+import {Button, Input, makeStyles} from "@material-ui/core";
 import {subscribeToTicker} from "./Redux/TikersReducer";
 
 const useStyles = makeStyles((theme) => ({
@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme) => ({
     },
     root: {
         flexGrow: 1,
+        justifyContent: "center"
     },
     paper: {
         padding: theme.spacing(2),
@@ -33,11 +34,8 @@ function App() {
 
     let tick = useSelector(store => store.tickers.tickers)
     let tickerCard = tick.map(t =>
-        <Paper className={classes.paper}>
-            <Grid container spacing={3}>
-                <Grid item xs={8} ><TickerCard props={t}/></Grid>
-            </Grid>
-        </Paper>)
+        <TickerCard props={t}/>
+    )
 
 
     const formik = useFormik({
@@ -58,11 +56,9 @@ function App() {
                     onChange={formik.handleChange} value={formik.values.name}
                 />
                 <Button type='submit'
-                        variant='contained' className={classes.button}> Add City</Button>
+                        variant='contained' className={classes.button}> Add ticker</Button>
             </form>
-
-            {tickerCard}
-
+                {tickerCard}
         </div>
     );
 }

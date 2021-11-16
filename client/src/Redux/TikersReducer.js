@@ -9,7 +9,6 @@ let initialState = {
     tickers: [],
 }
 
-
 export const tickersReducer = (state = initialState, action) => {
     switch (action.type) {
         case ADD_TICKER : {
@@ -36,19 +35,16 @@ export const setError = (error) => ({type: SET_ERROR, error})
 export const subscribeToTicker = (name, action) => {
     return (dispatch, getState) => {
         if (action === 'ADD_TICKER') {
-            debugger
             const socket = io('ws://localhost:4000')
             socket.emit('start');
             socket.on('ticker', (response) => {
                 const res = Array.isArray(response) ? response : [response];
                 for (let i = 0; i < res.length; i++) {
                     if (name === res[i].ticker) {
-                        console.log(getState().tickers.tickers.map(e => e.ticker === name))
                         let arrF = getState().tickers.tickers.filter(obj => {
                             return obj.ticker === name
                         })
 
-                        console.log("arrF",arrF)
                         if (arrF[0] !== undefined && arrF[0].ticker === name) {
                             dispatch(refreshTicker(res[i]))
                         } else {
@@ -56,7 +52,6 @@ export const subscribeToTicker = (name, action) => {
                         }
                     }
                 }
-
             })
         }
     }
